@@ -21,8 +21,8 @@ public class QuestionController {
     }
 
     @GetMapping
-    public Flux<QuestionResponseDTO> getAllQuestions(@RequestParam(defaultValue = "10") int size) {
-        return questionService.getAllQuestions(size);
+    public Flux<QuestionResponseDTO> getAllQuestions(@RequestParam(required = false) String cursor,@RequestParam(defaultValue = "10") int size) {
+        return questionService.getAllQuestions(cursor,size);
     }
 
     // Debug endpoint

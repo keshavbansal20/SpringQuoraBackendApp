@@ -6,6 +6,9 @@ import com.example.demo.dto.QuestionResponseDTO;
 import com.example.demo.models.Question;
 import com.example.demo.repositories.QuestionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -30,12 +33,22 @@ public class QuestionService {
                 .map(count -> QuestionAdapter.toQuestionResponseDTO( savedQuestion ,count)));
     }
 
-    public Flux<QuestionResponseDTO> getAllQuestions(int size) {
-        return questionRepository.findTop10ByOrderByCreatedAtAsc()
-                .take(size)
-                .index()
-                .map(tuple -> QuestionAdapter.toQuestionResponseDTO(tuple.getT2(), tuple.getT1()))
-                .doOnNext(q -> System.out.println("Fetched question: " + q.getTitle()));
+    public Flux<QuestionResponseDTO> getAllQuestions(String cursor ,int size) {
+        if(cursor!=null && cursor.trim().length()>0){
+            Pageable pageable = PageRequest.of(0, size);
+            LocalDateTime cursorDateTime = LocalDateTime.parse(cursor);
+            return questionRepository.findByCreatedAtGreaterThanOrderByCreatedAtAsc(cursorDateTime,pageable)
+                    .index()
+                    .map( tuple -> QuestionAdapter.toQuestionResponseDTO(tuple.getT2(),tuple.getT1()))
+                    .doOnNext(q -> System.out.println("Fetched question: " + q.getTitle()));
+        }else{
+            return questionRepository.findTop10ByOrderByCreatedAtAsc()
+                    .take(size)
+                    .index()
+                    .map(tuple -> QuestionAdapter.toQuestionResponseDTO(tuple.getT2(), tuple.getT1()))
+                    .doOnNext(q -> System.out.println("Fetched question: " + q.getTitle()));
+        }
+
     }
 
     // For debugging
