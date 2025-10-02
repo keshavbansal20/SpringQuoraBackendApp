@@ -30,4 +30,17 @@ public class QuestionController {
     public Flux<QuestionResponseDTO> getAllQuestionsNoLimit() {
         return questionService.getAllQuestionsNoLimit();
     }
+
+    @DeleteMapping("/{id}")
+    public  Mono<Void> deleteQuestionById(@PathVariable String id){
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    @GetMapping("/tag/{tag}")
+    public Flux<QuestionResponseDTO> getAllQuestionsByTag(@PathVariable String tag
+        ,@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size
+    )
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
 }
