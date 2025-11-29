@@ -2,6 +2,7 @@ package com.example.demo.controllers;
 
 import com.example.demo.dto.QuestionRequestDTO;
 import com.example.demo.dto.QuestionResponseDTO;
+import com.example.demo.models.Question;
 import com.example.demo.services.QuestionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +35,15 @@ public class QuestionController {
     @DeleteMapping("/{id}")
     public  Mono<Void> deleteQuestionById(@PathVariable String id){
         throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    @GetMapping("/search")
+    public Flux<QuestionResponseDTO> searchQuestions(
+            @RequestParam String query,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ){
+        return questionService.searchQuestions(query,page,size);
     }
 
     @GetMapping("/tag/{tag}")

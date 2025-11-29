@@ -1,12 +1,12 @@
 package com.example.demo.services;
 
+import com.example.demo.Services.IQuestionService;
 import com.example.demo.adapters.QuestionAdapter;
 import com.example.demo.dto.QuestionRequestDTO;
 import com.example.demo.dto.QuestionResponseDTO;
 import com.example.demo.models.Question;
 import com.example.demo.repositories.QuestionRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
-public class QuestionService {
+public class QuestionService implements IQuestionService {
 
     private final QuestionRepository questionRepository;
 
@@ -39,7 +39,7 @@ public class QuestionService {
             LocalDateTime cursorDateTime = LocalDateTime.parse(cursor);
             return questionRepository.findByCreatedAtGreaterThanOrderByCreatedAtAsc(cursorDateTime,pageable)
                     .index()
-                    .map( tuple -> QuestionAdapter.toQuestionResponseDTO(tuple.getT2(),tuple.getT1()))
+                    .map( tuple -> QuestionAdapter.toQuestionResponseDTO(tuple.getT2(),(tuple.getT1()+1)))
                     .doOnNext(q -> System.out.println("Fetched question: " + q.getTitle()));
         }else{
             return questionRepository.findTop10ByOrderByCreatedAtAsc()
@@ -67,5 +67,27 @@ public class QuestionService {
                             .build();
                 })
                 .doOnNext(q -> System.out.println("Fetched question: " + q.getTitle()));
+    }
+
+    @Override
+    public Flux<QuestionResponseDTO> searchQuestions(String query, int page, int size) {
+        return questionRepository.findByTitleOrContentContainingIgnoreCase(query ,PageRequest.of(page ,size))
+                .index()
+                .map(tuple -> QuestionAdapter.toQuestionResponseDTO(tuple.getT2(),(tuple.getT1()+1)))
+                .doOnError(error -> System.out.println("Error searching questions: " + error))
+                .doOnComplete(() -> System.out.println("Questions searched successfully"));
+    }
+
+    @Override
+    public void findAll(){
+        return;
+    }
+
+    @Override
+    public Mono<QuestionResponseDTO> getQuestionById(String questionId) {
+        return questionRepository.findById(questionId).
+                map(QuestionAdapter::toQuestionResponseDTO)
+                .doOnError(error -> System.out.println("Error getting questions: "+error))
+                .doOnSuccess(response -> System.out.println("Questions found successfully"+response));
     }
 }

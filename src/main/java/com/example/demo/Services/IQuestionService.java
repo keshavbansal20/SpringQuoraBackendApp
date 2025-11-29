@@ -2,7 +2,6 @@ package com.example.demo.Services;
 
 import com.example.demo.dto.QuestionRequestDTO;
 import com.example.demo.dto.QuestionResponseDTO;
-import com.example.demo.models.Question;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -11,5 +10,9 @@ public interface IQuestionService {
 
     Flux<QuestionResponseDTO> getAllQuestions(String cursor , int size);
 
-    Flux<Question> findAll();
+    void findAll();
+
+    Flux<QuestionResponseDTO> searchQuestions(String query , int page, int size);
+
+    public Mono<QuestionResponseDTO> getQuestionById(String questionId);
 }
