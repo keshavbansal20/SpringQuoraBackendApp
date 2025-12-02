@@ -4,7 +4,9 @@ import com.example.demo.Services.IQuestionService;
 import com.example.demo.adapters.QuestionAdapter;
 import com.example.demo.dto.QuestionRequestDTO;
 import com.example.demo.dto.QuestionResponseDTO;
+import com.example.demo.events.ViewCountEvent;
 import com.example.demo.models.Question;
+import com.example.demo.producers.KafkaEventProducer;
 import com.example.demo.repositories.QuestionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +22,8 @@ import java.time.LocalDateTime;
 public class QuestionService implements IQuestionService {
 
     private final QuestionRepository questionRepository;
+
+    private final KafkaEventProducer kafkaEventProducer;
 
     public Mono<QuestionResponseDTO> createQuestion(QuestionRequestDTO request) {
         Question question = Question.builder()
@@ -88,6 +92,10 @@ public class QuestionService implements IQuestionService {
         return questionRepository.findById(questionId).
                 map(QuestionAdapter::toQuestionResponseDTO)
                 .doOnError(error -> System.out.println("Error getting questions: "+error))
-                .doOnSuccess(response -> System.out.println("Questions found successfully"+response));
+                .doOnSuccess(response -> {
+                    System.out.println("Questions found successfully"+response);
+                    ViewCountEvent viewCountEvent = new ViewCountEvent(questionId,"questions",LocalDateTime.now());
+                    kafkaEventProducer.publishViewCountEvent(viewCountEvent);
+                });
     }
 }
