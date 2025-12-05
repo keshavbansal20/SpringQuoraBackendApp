@@ -37,6 +37,12 @@ public class QuestionController {
         throw new UnsupportedOperationException("Not Implemented");
     }
 
+    @GetMapping("/{id}")
+    public Mono<QuestionResponseDTO> getQuestionById(@PathVariable String id){
+        return questionService.getQuestionById(id)
+                .doOnError(error->System.out.println("Error Fetching question: "+error))
+                .doOnSuccess(response -> System.out.println("Questions found successfully"+response));
+    }
     @GetMapping("/search")
     public Flux<QuestionResponseDTO> searchQuestions(
             @RequestParam String query,
