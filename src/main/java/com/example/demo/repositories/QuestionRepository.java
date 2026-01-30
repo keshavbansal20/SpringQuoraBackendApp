@@ -17,4 +17,7 @@ public interface    QuestionRepository extends ReactiveMongoRepository<Question,
     Flux<Question> findTop10ByOrderByCreatedAtAsc();
 
     Flux<Question> findByCreatedAtGreaterThanOrderByCreatedAtAsc(LocalDateTime cursor, Pageable pageable);
+    
+    // Method to get all questions with pagination and sorting
+    Flux<Question> findAllBy(Pageable pageable);
 }

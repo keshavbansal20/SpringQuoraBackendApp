@@ -1,10 +1,13 @@
 package com.example.demo.controllers;
 
+import com.example.demo.dto.PagedResponseDTO;
 import com.example.demo.dto.QuestionRequestDTO;
 import com.example.demo.dto.QuestionResponseDTO;
 import com.example.demo.models.Question;
 import com.example.demo.models.QuestionElasticDocument;
 import com.example.demo.services.QuestionService;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -20,7 +23,7 @@ public class QuestionController {
     private final QuestionService questionService;
 
     @PostMapping
-    public Mono<QuestionResponseDTO> createQuestion(@RequestBody QuestionRequestDTO request) {
+    public Mono<QuestionResponseDTO> createQuestion(@Valid @RequestBody QuestionRequestDTO request) {
         // TEST LOG - If you see this, the controller is receiving the request!
         System.out.println("##################################################");
         System.out.println("### CONTROLLER RECEIVED POST REQUEST ###");
@@ -35,8 +38,12 @@ public class QuestionController {
     }
 
     @GetMapping
-    public Flux<QuestionResponseDTO> getAllQuestions(@RequestParam(required = false) String cursor,@RequestParam(defaultValue = "10") int size) {
-        return questionService.getAllQuestions(cursor,size);
+    public Mono<PagedResponseDTO<QuestionResponseDTO>> getAllQuestions(
+            @RequestParam(required = false) String cursor,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false, defaultValue = "createdAt") String sortBy,
+            @RequestParam(required = false, defaultValue = "desc") String sortOrder) {
+        return questionService.getAllQuestions(cursor, size, sortBy, sortOrder);
     }
 
     // Debug endpoint
